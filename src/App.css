@@ -1,0 +1,40 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 20vmin);
+  grid-template-rows: repeat(3, 20vmin);
+  gap: 0px;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  background-color: #dfe9ff;
+  cursor: pointer;
+  height: 20vmin;
+  border: rgb(31, 73, 129);
+  border-style: solid;
+}
+.cell-playable:hover {
+  background-color: #f7faff;
+}
+
+.cell-not-playable {
+  cursor: not-allowed;
+  background-color:  #afbbd4;
+}
+
+.cell-x {
+  background-color: #dff5ff;
+}
+.cell-zero {
+  background-color: rgb(223, 255, 234);
+}

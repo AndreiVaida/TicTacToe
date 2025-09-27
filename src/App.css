@@ -23,18 +23,20 @@
   border: rgb(31, 73, 129);
   border-style: solid;
 }
+
 .cell-playable:hover {
   background-color: #f7faff;
 }
 
 .cell-not-playable {
   cursor: not-allowed;
-  background-color:  #afbbd4;
+  background-color: #afbbd4;
 }
 
 .cell-x {
   background-color: #dff5ff;
 }
+
 .cell-zero {
   background-color: rgb(223, 255, 234);
 }

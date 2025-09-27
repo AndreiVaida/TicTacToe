@@ -1,3 +1,7 @@
+:root {
+    --cellSize: 30vmin
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -7,8 +11,8 @@
 
 .board {
   display: grid;
-  grid-template-columns: repeat(3, 20vmin);
-  grid-template-rows: repeat(3, 20vmin);
+  grid-template-columns: repeat(3, var(--cellSize));
+  grid-template-rows: repeat(3, var(--cellSize));
   gap: 0px;
 }
 
@@ -19,7 +23,7 @@
   font-size: 2rem;
   background-color: #dfe9ff;
   cursor: pointer;
-  height: 20vmin;
+  height: var(--cellSize);
   border: rgb(31, 73, 129);
   border-style: solid;
 }

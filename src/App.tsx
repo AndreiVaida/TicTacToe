@@ -15,28 +15,35 @@ const App = () => {
     const handleClick = (i: number, j: number): void => {
         const updatedGame = gameService.nextMove(game!, i, j);
         setGame(updatedGame);
+        
+        if (updatedGame.winner !== undefined)
+            notifyGameOver(updatedGame.winner);
     };
 
     const createCell = (i: number, j: number, cell: Cell) => {
         const isCellPlayable = gameService.isCellPlayable(i, j, game!);
-        const player = game!.table[i][j];
         return (
-            <div key={i + "_" + j} className={getCellClasses(player)} onClick={isCellPlayable ? () => handleClick(i, j) : undefined}>
+            <div key={i + "_" + j} className={getCellClasses(cell, isCellPlayable)} onClick={isCellPlayable ? () => handleClick(i, j) : undefined}>
                 <span>{cell}</span>
             </div>
         );
     };
 
-    const createLine = (i: number, line: Cell[]) => (
-        <div>{line.map((cell, j) => createCell(i, j, cell))}</div>
-    );
+    const createLine = (i: number, line: Cell[]) => line.map((cell, j) => createCell(i, j, cell));
 
-    const getCellClasses = (player: Cell): string => {
-        switch (player) {
-            case Cell.EMPTY: return "cell cell-playable";
+    const getCellClasses = (cell: Cell, isCellPlayable: boolean): string => {
+        switch (cell) {
+            case Cell.EMPTY: return isCellPlayable ? "cell cell-playable" : "cell cell-not-playable";
             case Cell.X: return "cell cell-not-playable cell-x";
             case Cell.ZERO: return "cell cell-not-playable cell-zero";
         }
+    };
+
+    const notifyGameOver = (winner: Cell) => {
+        setTimeout(() => {
+            if (winner === Cell.EMPTY) alert("Egalitate!");
+            else alert(`${winner} a câștigat!`);
+        }, 100);
     };
 
     return (
@@ -45,7 +52,7 @@ const App = () => {
             <div className="board">
                 {
                     game
-                        ? game.table.map((line, i) => createLine(i, line))
+                        ? game.table.flatMap((line, i) => createLine(i, line))
                         : "Game not available"
                 }
             </div>

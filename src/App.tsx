@@ -49,6 +49,7 @@ const App = () => {
     return (
         <>
             <h1>X și 0</h1>
+            <button className="reset-btn" onClick={() => setGame(gameService.getInitialGame())}>Joc nou</button>
             <div className="board">
                 {
                     game

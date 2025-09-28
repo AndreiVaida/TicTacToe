@@ -42,20 +42,3 @@
 .cell-zero {
   background-color: rgb(223, 255, 234);
 }
-
-.reset-btn {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    padding: 0.5rem 1.2rem;
-    font-size: 1rem;
-    background-color: #1f4981;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    z-index: 10;
-}
-.reset-btn:hover {
-    background-color: #2e5ca3;
-}

@@ -1,32 +1,43 @@
-import { Cell, type Game, type Player } from "../model/GameModels";
+import { Cell, type Game, type Player, type Position } from "../model/GameModels";
 
 export class TicTacToeService {
-    public getInitialGame = (): Game => {
+    public getInitialGame = (game?: Game): Game => {
         const table = this.createEmptyTable();
-        const firstPlayer: Player = { symbol: Cell.X, isComputer: false };
+        const playerX: Player = game?.playerX ?? { symbol: Cell.X, isComputer: false };
+        const player0: Player = game?.player0 ?? { symbol: Cell.ZERO, isComputer: false };
         return {
             table,
-            currentPlayer: firstPlayer,
+            playerX,
+            player0,
+            currentPlayer: playerX,
             isGameOver: false,
         };
     };
 
     public isCellPlayable = (i: number, j: number, game: Game): boolean => game.table[i][j] === Cell.EMPTY && !game.winner;
 
-    public nextMove = (game: Game, row: number, column: number): Game => {
+    public nextMove = (game: Game, position: Position): Game => {
         const newTable = this.copyTable(game.table);
-        newTable[row][column] = game.currentPlayer!.symbol;
+        newTable[position.row][position.column] = game.currentPlayer!.symbol;
 
         const winnerSymbol = this.getGameWinner(newTable);
         const nextPlayer = this.getNextPlayer(winnerSymbol, game);
-        const winner = this.createWinnerPlayer(winnerSymbol);
+        const winner = this.createWinnerPlayer(winnerSymbol, game);
+        const isGameOver = winnerSymbol !== null;
 
-        return {
+        const newGame = {
+            ...game,
             table: newTable,
             currentPlayer: nextPlayer,
             winner,
-            isGameOver: winnerSymbol !== null,
+            isGameOver
         };
+
+        if (!isGameOver && nextPlayer!.isComputer) {
+            const computerMove = this.nextComputerMove(newTable, nextPlayer!);
+            return this.nextMove(newGame, computerMove);
+        }
+        return newGame;
     };
 
     private createEmptyTable = (): Cell[][] => {
@@ -96,13 +107,60 @@ export class TicTacToeService {
      */
     private getNextPlayer = (winnerSymbol: Cell | null, game: Game): Player | null => {
         if (winnerSymbol !== null) return null;
-
-        const nextPlayerSymbol = game.currentPlayer!.symbol === Cell.X ? Cell.ZERO : Cell.X;
-        return { symbol: nextPlayerSymbol, isComputer: false };
+        return game.currentPlayer!.symbol === Cell.X ? game.player0 : game.playerX;
     };
 
-    private createWinnerPlayer = (winnerSymbol: Cell | null): Player | undefined =>
-        winnerSymbol == Cell.X || winnerSymbol == Cell.ZERO
-            ? { symbol: winnerSymbol, isComputer: false }
-            : undefined;
+    private createWinnerPlayer = (winnerSymbol: Cell | null, game: Game): Player | undefined => {
+        if (winnerSymbol === null || winnerSymbol === Cell.EMPTY) return undefined;
+        return winnerSymbol == Cell.X ? game.playerX : game.player0;
+    };
+
+    private nextComputerMove = (table: Cell[][], player: Player): Position =>
+        this.findWinningMove(table, player.symbol)
+        ?? this.findDefensiveMove(table, player.symbol)
+        ?? this.findRandomMove(table);
+
+    /**
+     * Searches for a move that wins the game (1 move, the next move).
+     * @param table The current game
+     * @param player The symbol of the player that wants to win (X or 0)
+     * @returns the coordinates of the winning move, or null if no winning move is found
+     */
+    private findWinningMove = (table: Cell[][], player: Cell): Position | null => {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (table[i][j] === Cell.EMPTY) {
+                    const nextTable = this.copyTable(table);
+                    nextTable[i][j] = player;
+                    if (this.getGameWinner(nextTable) === player)
+                        return {row: i, column: j};
+                }
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Blocks the opponent from winning in their next move, if the opponent can win in their next move.
+     * @param table The current game
+     * @param symbol The symbol of the player that wants to block the opponent (X or 0)
+     * @returns The coordinates of the blocking move, or null if no blocking move is found (i.e. the opponent cannot win in their next move)
+     */
+    private findDefensiveMove = (table: Cell[][], player: Cell): Position | null => this.findWinningMove(table, player === Cell.X ? Cell.ZERO : Cell.X);
+
+    /**
+     * @returns A random empty position on the table
+     */
+    private findRandomMove = (table: Cell[][]): Position => {
+        const emptyPositions: Position[] = [];
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (table[i][j] === Cell.EMPTY) {
+                    emptyPositions.push({row: i, column: j});
+                }
+            }
+        }
+        const randomIndex = Math.floor(Math.random() * emptyPositions.length);
+        return emptyPositions[randomIndex];
+    };
 }

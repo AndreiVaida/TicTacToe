@@ -3,6 +3,7 @@ import "./App.css";
 import { TicTacToeService } from "./service/TicTacToeService";
 import { Cell } from "./model/GameModels";
 import type { Game, Player } from "./model/GameModels";
+import { GameMenu } from "./components/GameMenu";
 
 const App = () => {
     const gameService = useMemo(() => new TicTacToeService(), []);
@@ -13,7 +14,7 @@ const App = () => {
     }, [gameService]);
 
     const handleClick = (i: number, j: number): void => {
-        const updatedGame = gameService.nextMove(game!, i, j);
+        const updatedGame = gameService.nextMove(game!, {row: i, column: j});
         setGame(updatedGame);
         
         if (updatedGame.isGameOver)
@@ -46,10 +47,12 @@ const App = () => {
         }, 100);
     };
 
+    const setGameState = (newGame: Game) => setGame(newGame);
+
     return (
         <>
             <h1>X și 0</h1>
-            <button className="reset-btn" onClick={() => setGame(gameService.getInitialGame())}>Joc nou</button>
+            <GameMenu gameService={gameService} game={game} setGame={setGameState} />
             <div className="board">
                 {
                     game

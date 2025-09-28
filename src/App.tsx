@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import { TicTacToeService } from "./service/TicTacToeService";
 import { Cell } from "./model/GameModels";
-import type { Game } from "./model/GameModels";
+import type { Game, Player } from "./model/GameModels";
 
 const App = () => {
     const gameService = useMemo(() => new TicTacToeService(), []);
@@ -16,7 +16,7 @@ const App = () => {
         const updatedGame = gameService.nextMove(game!, i, j);
         setGame(updatedGame);
         
-        if (updatedGame.winner !== undefined)
+        if (updatedGame.isGameOver)
             notifyGameOver(updatedGame.winner);
     };
 
@@ -39,10 +39,10 @@ const App = () => {
         }
     };
 
-    const notifyGameOver = (winner: Cell) => {
+    const notifyGameOver = (winner: Player | undefined) => {
         setTimeout(() => {
-            if (winner === Cell.EMPTY) alert("Egalitate!");
-            else alert(`${winner} a câștigat!`);
+            if (!winner) alert("Egalitate!");
+            else alert(`${winner.symbol} a câștigat!`);
         }, 100);
     };
 

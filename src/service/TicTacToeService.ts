@@ -1,11 +1,13 @@
-import { Cell, type Game } from "../model/GameModels";
+import { Cell, type Game, type Player } from "../model/GameModels";
 
 export class TicTacToeService {
     public getInitialGame = (): Game => {
         const table = this.createEmptyTable();
+        const firstPlayer: Player = { symbol: Cell.X, isComputer: false };
         return {
             table,
-            currentPlayer: Cell.X
+            currentPlayer: firstPlayer,
+            isGameOver: false,
         };
     };
 
@@ -13,17 +15,17 @@ export class TicTacToeService {
 
     public nextMove = (game: Game, row: number, column: number): Game => {
         const newTable = this.copyTable(game.table);
-        newTable[row][column] = game.currentPlayer;
+        newTable[row][column] = game.currentPlayer!.symbol;
 
-        const winner = this.getGameWinner(newTable);
-        const nextPlayer = winner === Cell.EMPTY
-            ? Cell.EMPTY
-            : game.currentPlayer === Cell.X ? Cell.ZERO : Cell.X;
-        
+        const winnerSymbol = this.getGameWinner(newTable);
+        const nextPlayer = this.getNextPlayer(winnerSymbol, game);
+        const winner = this.createWinnerPlayer(winnerSymbol);
+
         return {
             table: newTable,
             currentPlayer: nextPlayer,
-            winner: winner ?? undefined
+            winner,
+            isGameOver: winnerSymbol !== null,
         };
     };
 
@@ -42,6 +44,10 @@ export class TicTacToeService {
 
     private copyTable = (table: Cell[][]): Cell[][] => table.map(line => [...line]);
     
+    /**
+     * @param table - the current game table
+     * @returns The winner Cell (X or 0), Cell.EMPTY in case of a draw, or null if the game is still ongoing
+     */
     private getGameWinner = (table: Cell[][]): Cell | null => {
         const winner = this.getHorizontalWinner(table)
             ?? this.getVerticalWinner(table)
@@ -82,4 +88,21 @@ export class TicTacToeService {
     };
 
     private allEqual = (line: Cell[]): boolean => line.every(cell => cell === line[0]);
+
+    /**
+     * @param winnerSymbol The symbol of the winner (X, 0, or EMPTY in case of a draw), or null if the game is still ongoing
+     * @param game The current game state
+     * @returns The next player, or null if the game is over (win or draw)
+     */
+    private getNextPlayer = (winnerSymbol: Cell | null, game: Game): Player | null => {
+        if (winnerSymbol !== null) return null;
+
+        const nextPlayerSymbol = game.currentPlayer!.symbol === Cell.X ? Cell.ZERO : Cell.X;
+        return { symbol: nextPlayerSymbol, isComputer: false };
+    };
+
+    private createWinnerPlayer = (winnerSymbol: Cell | null): Player | undefined =>
+        winnerSymbol == Cell.X || winnerSymbol == Cell.ZERO
+            ? { symbol: winnerSymbol, isComputer: false }
+            : undefined;
 }

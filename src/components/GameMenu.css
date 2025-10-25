@@ -1,10 +1,31 @@
-.menu {
+.leftMenu {
     position: absolute;
     top: 1rem;
     left: 1rem;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+}
+
+.centerMenu {
+    position: absolute;
+    top: 0;
+    margin: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 5vmin;
+}
+
+.rightMenu {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 .reset-btn {
@@ -74,7 +95,7 @@
 
 /* Portrait (vertical) screens — apply regardless of device resolution */
 @media (max-aspect-ratio: 2/3) {
-  .menu {
+  .leftMenu {
     position: absolute;
     top: 0.5rem;
     left: 0.5rem;

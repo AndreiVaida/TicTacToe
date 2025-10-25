@@ -51,7 +51,6 @@ const App = () => {
 
     return (
         <>
-            <h1>X și 0</h1>
             <GameMenu gameService={gameService} game={game} setGame={setGameState} />
             <div className="board">
                 {

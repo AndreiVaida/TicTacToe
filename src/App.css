@@ -1,10 +1,50 @@
 :root {
-    --cellSize: 30vmin
+    --cellSize: 30vmin;
+    --cell-font-size: 20vmin;
+    --background: #fff9e7;
+    --foreground: #003663;
+    --cell-background-hover: #f7faff;
+    
+    --cell-background-X: #e6feff;
+    --cell-foreground-X: #037ba0;
+    
+    --cell-background-0: rgb(254, 255, 206);
+    --cell-foreground-0: rgb(150, 110, 1);
+}
+
+[data-theme="dark"] {
+    --background: #021425;
+    --foreground: #9cc3e4;
+    --cell-background-hover: #48494b;
+    
+    --cell-background-X: #033636;
+    --cell-foreground-X: #0e98c2;
+    
+    --cell-background-0: rgb(77, 56, 0);
+    --cell-foreground-0: rgb(240, 186, 40);
+}
+
+* {
+  font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
 }
 
 #root {
   margin: 0 auto;
   text-align: center;
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .board {
@@ -14,12 +54,18 @@
   gap: 0px;
 }
 
+@media (min-aspect-ratio: 8/9) {
+  .board { margin-top: 4rem; }
+}
+
 .cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  background-color: #dfe9ff;
+  font-size: var(--cell-font-size);
+  background: radial-gradient(circle, #ccc 10%, transparent 10%) 0 0,
+              radial-gradient(circle, #ccc 10%, transparent 10%) 10px 10px;
+  background-size: 20px 20px;
   cursor: pointer;
   height: var(--cellSize);
   border: rgb(31, 73, 129);
@@ -27,7 +73,7 @@
 }
 
 .cell-playable:hover {
-  background-color: #f7faff;
+  background-color: var(--cell-background-hover);
 }
 
 .cell-not-playable {
@@ -36,9 +82,13 @@
 }
 
 .cell-x {
-  background-color: #dff5ff;
+    background: none;
+    color: var(--cell-foreground-X);
+    background-color: var(--cell-background-X);
 }
 
 .cell-zero {
-  background-color: rgb(223, 255, 234);
+    background: none;
+    color: var(--cell-foreground-0);
+    background-color: var(--cell-background-0);
 }

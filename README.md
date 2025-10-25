@@ -15,5 +15,6 @@ Instructions:
 5. Paste the `bundle.js` content inside the new `<script> </script>`!
 6. Save `index.html`! Delete `bundle.js`!
 7. Copy-Paste `index.html` on any device! Open and play!
+8. [optional GitHub pages release] Overwrite `docs/index.html` with the new file and push to GitHub!
 
 Play TicTacToe: https://andreivaida.github.io/TicTacToe

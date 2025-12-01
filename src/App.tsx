@@ -41,6 +41,8 @@ const App = () => {
     };
 
     const notifyGameOver = (winner: Player | undefined) => {
+        console.info(`🏁 Game over. ${winner ? `${winner.symbol} won` : "Draw"}`);
+
         setTimeout(() => {
             if (!winner) alert("Egalitate!");
             else alert(`${winner.symbol} a câștigat!`);

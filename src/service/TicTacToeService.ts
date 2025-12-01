@@ -2,6 +2,8 @@ import { Cell, Difficulty, type Game, type Player, type Position } from "../mode
 
 export class TicTacToeService {
     public getInitialGame = (game?: Game): Game => {
+        console.info("▶️ New game");
+
         const table = this.createEmptyTable();
         const playerX: Player = game?.playerX ?? { symbol: Cell.X, isComputer: false };
         const player0: Player = game?.player0 ?? { symbol: Cell.ZERO, isComputer: false };
@@ -17,6 +19,7 @@ export class TicTacToeService {
     public isCellPlayable = (i: number, j: number, game: Game): boolean => game.table[i][j] === Cell.EMPTY && !game.winner;
 
     public nextMove = (game: Game, position: Position): Game => {
+        console.info(this.getPlayerMoveInfo(game.currentPlayer, position));
         const newTable = this.copyTable(game.table);
         newTable[position.row][position.column] = game.currentPlayer!.symbol;
 
@@ -54,6 +57,17 @@ export class TicTacToeService {
     };
 
     private copyTable = (table: Cell[][]): Cell[][] => table.map(line => [...line]);
+
+    private getPlayerMoveInfo = (player: Player | null, position: Position): string => {
+        if (!player) return `Unknown plays at [${position.row} ${position.column}]`;
+
+        if (!player.isComputer)
+            return `👱 ${player.symbol} plays at [${position.row} ${position.column}]`;
+
+        return `💻 ${player.symbol} plays at [${position.row} ${position.column}]${this.getPlayerDifficultyString(player)}`;
+    };
+
+    private getPlayerDifficultyString = (player: Player): string => player.computerDifficulty ? ` (${player.computerDifficulty})` : ""
     
     /**
      * @param table - the current game table
@@ -115,10 +129,21 @@ export class TicTacToeService {
         return winnerSymbol == Cell.X ? game.playerX : game.player0;
     };
 
-    private nextComputerMove = (table: Cell[][], player: Player): Position =>
-        this.findWinningMove(table, player.symbol)
-        ?? this.findDefensiveMove(table, player.symbol)
-        ?? this.getMoveForComputerDifficulty(table, player);
+    private nextComputerMove = (table: Cell[][], player: Player): Position => {
+        const winingMove = this.findWinningMove(table, player.symbol);
+        if (winingMove) {
+            console.info(`> 💻 ${player.symbol} plays wining move [${winingMove.row} ${winingMove.column}]${this.getPlayerDifficultyString(player)}`);
+            return winingMove;
+        }
+
+        const defensiveMove = this.findDefensiveMove(table, player.symbol);
+        if (defensiveMove) {
+            console.info(`> 💻 ${player.symbol} plays defensive move [${defensiveMove.row} ${defensiveMove.column}]${this.getPlayerDifficultyString(player)}`);
+            return defensiveMove;
+        }
+
+        return this.getMoveForComputerDifficulty(table, player);
+    };
 
     /**
      * Searches for a move that wins the game (1 move, the next move).
@@ -161,15 +186,29 @@ export class TicTacToeService {
             }
         }
         const randomIndex = Math.floor(Math.random() * emptyPositions.length);
-        return emptyPositions[randomIndex];
+        const randomMove = emptyPositions[randomIndex];
+        console.info(`> 💻 random move [${randomMove.row} ${randomMove.column}]`);
+        return randomMove;
     };
 
-    private getMoveForComputerDifficulty = (table: Cell[][], player: Player): Position =>
-        player.computerDifficulty === Difficulty.NORMAL
-            ? this.findRandomMove(table)
-            : (this.findExpertWinMove(table, player.symbol)
-                ?? this.findExpertDefensiveMove(table, player.symbol)
-                ?? this.findRandomMove(table));
+    private getMoveForComputerDifficulty = (table: Cell[][], player: Player): Position => {
+        if (player.computerDifficulty !== Difficulty.EXPERT)
+            return this.findRandomMove(table);
+
+        const expertWinMove = this.findExpertWinMove(table, player.symbol);
+        if (expertWinMove) {
+            console.info(`> 💻 ${player.symbol} plays expert win move [${expertWinMove.row} ${expertWinMove.column}]${this.getPlayerDifficultyString(player)}`);
+            return expertWinMove;
+        }
+
+        const defensiveExpertMove = this.findExpertDefensiveMove(table, player.symbol);
+        if (defensiveExpertMove) {
+            console.info(`> 💻 ${player.symbol} plays expert defensive move [${defensiveExpertMove.row} ${defensiveExpertMove.column}]${this.getPlayerDifficultyString(player)}`);
+            return defensiveExpertMove;
+        }
+
+        return this.findRandomMove(table);
+    };
 
     /**
      * Searches for a move that will lead to 2 possible win moves in the next move. The opponent will be able to block only 1 of the 2 future moves.

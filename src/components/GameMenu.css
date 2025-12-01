@@ -50,7 +50,6 @@
 
 .toggle {
   position: relative;
-  display: inline-block;
   width: 40px;
   height: 22px;
 }
@@ -91,6 +90,14 @@
 
 .toggle input:checked + .slider::before {
   transform: translateX(18px);
+}
+
+/* player toggle row: place player toggle and difficulty toggle side-by-side */
+.player-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 /* Portrait (vertical) screens — apply regardless of device resolution */

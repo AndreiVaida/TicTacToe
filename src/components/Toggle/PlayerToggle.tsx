@@ -1,4 +1,5 @@
-import type { Game, Player } from "../../model/GameModels";
+import { type Game, type Player } from "../../model/GameModels";
+import { ComputerDifficultyToggle } from "./ComputerDifficultyToggle";
 import { Toggle } from "./Toggle";
 
 type PlayerToggleProps = {
@@ -21,10 +22,13 @@ export const PlayerToggle = ({ game, setGame, player }: PlayerToggleProps) => {
     const text = `${player.symbol} este ${player.isComputer ? "calculator" : "om"}`;
 
     return (
-        <Toggle
-            ischecked={player.isComputer ?? false}
-            onToggle={onPlayerModeChange}
-            text={text}
-        />
+        <div className="player-toggle-row">
+            <Toggle
+                ischecked={player.isComputer ?? false}
+                onToggle={onPlayerModeChange}
+                text={text}
+            />
+            {player.isComputer && <ComputerDifficultyToggle game={game} setGame={setGame} player={player} />}
+        </div>
     );
 };

@@ -118,9 +118,7 @@ export class TicTacToeService {
     private nextComputerMove = (table: Cell[][], player: Player): Position =>
         this.findWinningMove(table, player.symbol)
         ?? this.findDefensiveMove(table, player.symbol)
-        ?? (player.computerDifficulty === Difficulty.NORMAL
-            ? this.findRandomMove(table)
-            : this.findExpertMove(table, player.symbol) ?? this.findRandomMove(table));
+        ?? this.getMoveForComputerDifficulty(table, player);
 
     /**
      * Searches for a move that wins the game (1 move, the next move).
@@ -166,6 +164,13 @@ export class TicTacToeService {
         return emptyPositions[randomIndex];
     };
 
+    private getMoveForComputerDifficulty = (table: Cell[][], player: Player): Position =>
+        player.computerDifficulty === Difficulty.NORMAL
+            ? this.findRandomMove(table)
+            : (this.findExpertWinMove(table, player.symbol)
+                ?? this.findExpertDefensiveMove(table, player.symbol)
+                ?? this.findRandomMove(table));
+
     /**
      * Searches for a move that will lead to 2 possible win moves in the next move. The opponent will be able to block only 1 of the 2 future moves.
      * The table must have at least 2 moves of the player.
@@ -173,7 +178,7 @@ export class TicTacToeService {
      * @param player The symbol of the player that wants to do the expert move (X or 0)
      * @returns the coordinates of the expert move, or null if no expert move is found
      */
-    private findExpertMove = (table: Cell[][], player: Cell): Position | null => {
+    private findExpertWinMove = (table: Cell[][], player: Cell): Position | null => {
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 if (table[i][j] === Cell.EMPTY) {
@@ -184,6 +189,31 @@ export class TicTacToeService {
                 }
             }
         }
+        return null;
+    };
+
+    /**
+     * If the opponent can do an expert winning move, block it.
+     * But if the opponent can do 2 expert winning moves (i.e. still has a wining move after blocking it) then force them to play elsewhere by aligning 2 symbols.
+     * @param table The current game
+     * @param player The symbol of the player that wants to do the expert move (X or 0)
+     * @returns the coordinates of the expert move, or null if no expert move is found
+     */
+    private findExpertDefensiveMove = (table: Cell[][], player: Cell): Position | null => {
+        const opponent = player === Cell.X ? Cell.ZERO : Cell.X;
+        const defensiveExpertMove = this.findExpertWinMove(table, opponent);
+        
+        if (defensiveExpertMove) {
+            const nextTable = this.copyTable(table);
+            nextTable[defensiveExpertMove.row][defensiveExpertMove.column] = player;
+
+            const opponentExpertWinMove = this.findExpertWinMove(nextTable, opponent);
+            if (opponentExpertWinMove) {
+                // don't allow the opponent to do the expert move - by forcing them to play elsewhere
+                return this.findMoveToAlign2Inline(nextTable, player);
+            }
+            return defensiveExpertMove;
+        };
         return null;
     };
 
@@ -206,5 +236,19 @@ export class TicTacToeService {
             }
         }
         return nrOfWiningMoves;
+    }
+
+    private findMoveToAlign2Inline(table: Cell[][], player: Cell): Position | null {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (table[i][j] === Cell.EMPTY) {
+                    const nextTable = this.copyTable(table);
+                    nextTable[i][j] = player;
+                    if (this.getNrOfWinMoves(nextTable, player) >= 1)
+                        return {row: i, column: j};
+                }
+            }
+        }
+        return null;
     }
 }

@@ -234,6 +234,7 @@ export class TicTacToeService {
     /**
      * If the opponent can do an expert winning move, block it.
      * But if the opponent can do 2 expert winning moves (i.e. still has a wining move after blocking it) then force them to play elsewhere by aligning 2 symbols.
+     * But be aware where we force them to play elsewhere, as they might get an expert winning move.
      * @param table The current game
      * @param player The symbol of the player that wants to do the expert move (X or 0)
      * @returns the coordinates of the expert move, or null if no expert move is found
@@ -249,7 +250,7 @@ export class TicTacToeService {
             const opponentExpertWinMove = this.findExpertWinMove(nextTable, opponent);
             if (opponentExpertWinMove) {
                 // don't allow the opponent to do the expert move - by forcing them to play elsewhere
-                return this.findMoveToAlign2Inline(nextTable, player);
+                return this.findExpertMoveToAlign2Inline(table, player);
             }
             return defensiveExpertMove;
         };
@@ -277,14 +278,28 @@ export class TicTacToeService {
         return nrOfWiningMoves;
     }
 
-    private findMoveToAlign2Inline(table: Cell[][], player: Cell): Position | null {
+    private findExpertMoveToAlign2Inline(table: Cell[][], player: Cell): Position | null {
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 if (table[i][j] === Cell.EMPTY) {
                     const nextTable = this.copyTable(table);
                     nextTable[i][j] = player;
-                    if (this.getNrOfWinMoves(nextTable, player) >= 1)
-                        return {row: i, column: j};
+                    const move = {row: i, column: j};
+
+                    if (this.getNrOfWinMoves(nextTable, player) >= 1) {
+                        // we have 2 symbols in line, so opponent is forced to block
+                        const opponent = player === Cell.X ? Cell.ZERO : Cell.X;
+                        const oppononeBlock = this.findDefensiveMove(nextTable, opponent);
+                        if (oppononeBlock === null) return move;
+
+                        const nextTable2 = this.copyTable(nextTable);
+                        nextTable2[oppononeBlock.row][oppononeBlock.column] = opponent;
+
+                        // check if the opponent has an expert win move
+                        const opponenthasExpertWinMove = this.getNrOfWinMoves(nextTable2, opponent) >= 2;
+                        if (!opponenthasExpertWinMove)
+                            return move;
+                    }
                 }
             }
         }

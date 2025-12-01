@@ -1,4 +1,4 @@
-import { Cell, type Game, type Player, type Position } from "../model/GameModels";
+import { Cell, Difficulty, type Game, type Player, type Position } from "../model/GameModels";
 
 export class TicTacToeService {
     public getInitialGame = (game?: Game): Game => {
@@ -118,7 +118,9 @@ export class TicTacToeService {
     private nextComputerMove = (table: Cell[][], player: Player): Position =>
         this.findWinningMove(table, player.symbol)
         ?? this.findDefensiveMove(table, player.symbol)
-        ?? this.findRandomMove(table);
+        ?? (player.computerDifficulty === Difficulty.NORMAL
+            ? this.findRandomMove(table)
+            : this.findExpertMove(table, player.symbol) ?? this.findRandomMove(table));
 
     /**
      * Searches for a move that wins the game (1 move, the next move).
@@ -163,4 +165,46 @@ export class TicTacToeService {
         const randomIndex = Math.floor(Math.random() * emptyPositions.length);
         return emptyPositions[randomIndex];
     };
+
+    /**
+     * Searches for a move that will lead to 2 possible win moves in the next move. The opponent will be able to block only 1 of the 2 future moves.
+     * The table must have at least 2 moves of the player.
+     * @param table The current game, where the player already has at ≥2 moves
+     * @param player The symbol of the player that wants to do the expert move (X or 0)
+     * @returns the coordinates of the expert move, or null if no expert move is found
+     */
+    private findExpertMove = (table: Cell[][], player: Cell): Position | null => {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (table[i][j] === Cell.EMPTY) {
+                    const nextTable = this.copyTable(table);
+                    nextTable[i][j] = player;
+                    if (this.getNrOfWinMoves(nextTable, player) >= 2)
+                        return {row: i, column: j};
+                }
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Counts the number of winning moves the player has in the current table.
+     * I.e. on how many lines the player has 2 symbols and an empty cell.
+     * @param table The current game
+     * @param player The symbol of the player that wants to do the expert move (X or 0)
+     */
+    private getNrOfWinMoves(table: Cell[][], player: Cell): number {
+        let nrOfWiningMoves = 0;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (table[i][j] === Cell.EMPTY) {
+                    const nextTable = this.copyTable(table);
+                    nextTable[i][j] = player;
+                    if (this.getGameWinner(nextTable) === player)
+                        nrOfWiningMoves++;
+                }
+            }
+        }
+        return nrOfWiningMoves;
+    }
 }

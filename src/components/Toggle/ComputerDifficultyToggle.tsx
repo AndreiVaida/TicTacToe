@@ -32,7 +32,8 @@ export const ComputerDifficultyToggle = ({ game, setGame, player }: ComputerDiff
 };
 
 const switchDifficulty = (player: Player): Player => {
-    const newDifficulty = player.computerDifficulty === Difficulty.NORMAL ? Difficulty.EXPERT : Difficulty.NORMAL;
+    const oldDifficulty = player.computerDifficulty ?? Difficulty.NORMAL;
+    const newDifficulty = oldDifficulty === Difficulty.NORMAL ? Difficulty.EXPERT : Difficulty.NORMAL;
     return {
         ...player,
         computerDifficulty: newDifficulty

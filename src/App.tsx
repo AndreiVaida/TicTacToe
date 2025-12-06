@@ -4,9 +4,13 @@ import { TicTacToeService } from "./service/TicTacToeService";
 import { Cell } from "./model/GameModels";
 import type { Game, Player } from "./model/GameModels";
 import { GameMenu } from "./components/GameMenu";
+import { TableService } from "./service/TableService";
+import { ComputerService } from "./service/ComputerService";
 
 const App = () => {
-    const gameService = useMemo(() => new TicTacToeService(), []);
+    const tableService = useMemo(() => new TableService(), []);
+    const computerService = useMemo(() => new ComputerService(tableService), [tableService]);
+    const gameService = useMemo(() => new TicTacToeService(tableService, computerService), [tableService, computerService]);
     const [game, setGame] = useState<Game>();
 
     useEffect(() => {
@@ -14,7 +18,7 @@ const App = () => {
     }, [gameService]);
 
     const handleClick = (i: number, j: number): void => {
-        const updatedGame = gameService.nextMove(game!, {row: i, column: j});
+        const updatedGame = gameService.doNextMove(game!, {row: i, column: j});
         setGame(updatedGame);
         
         if (updatedGame.isGameOver)
@@ -22,7 +26,7 @@ const App = () => {
     };
 
     const createCell = (i: number, j: number, cell: Cell) => {
-        const isCellPlayable = gameService.isCellPlayable(i, j, game!);
+        const isCellPlayable = tableService.isCellPlayable(i, j, game!);
         return (
             <div key={i + "_" + j} className={getCellClasses(cell, isCellPlayable)} onClick={isCellPlayable ? () => handleClick(i, j) : undefined}>
                 <span>{cell}</span>

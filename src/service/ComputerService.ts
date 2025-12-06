@@ -95,6 +95,12 @@ export class ComputerService {
             return defensiveExpertMove;
         }
 
+        if (this.tableService.getNrOfSymbols(table, player.symbol) === 1) {
+            const centerOrCornerMove = this.getCenterOrCornerMove(table)!;
+            console.info(`> 💻 ${player.symbol} plays expert second move [${centerOrCornerMove.row} ${centerOrCornerMove.column}]`);
+            return centerOrCornerMove;
+        }
+
         return this.findRandomMove(table);
     };
 

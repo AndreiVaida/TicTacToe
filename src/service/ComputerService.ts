@@ -24,7 +24,7 @@ export class ComputerService {
             return defensiveMove;
         }
 
-        return this.getMoveForComputerDifficulty(table, player);
+        return this.findMoveForComputerDifficulty(table, player);
     };
 
     /**
@@ -73,9 +73,15 @@ export class ComputerService {
         return randomMove;
     };
 
-    private getMoveForComputerDifficulty = (table: Cell[][], player: Player): Position => {
+    private findMoveForComputerDifficulty = (table: Cell[][], player: Player): Position => {
         if (player.computerDifficulty !== Difficulty.EXPERT)
             return this.findRandomMove(table);
+
+        if (this.tableService.getNrOfSymbols(table, player.symbol) === 0) {
+            const centerOrCornerMove = this.getCenterOrCornerMove(table)!;
+            console.info(`> 💻 ${player.symbol} plays expert initial move [${centerOrCornerMove.row} ${centerOrCornerMove.column}]`);
+            return centerOrCornerMove;
+        }
 
         const expertWinMove = this.findExpertWinMove(table, player.symbol);
         if (expertWinMove) {
@@ -93,7 +99,7 @@ export class ComputerService {
     };
 
     /**
-     * Searches for a move that will lead to 2 possible win moves in the next move. The opponent will be able to block only 1 of the 2 future moves.
+     * Searches for a move that will lead to 2 possible win moves in the next move. The opponent will be able to block only 1 of the 2 of them.
      * The table must have at least 2 moves of the player.
      * @param table The current game, where the player already has at ≥2 moves
      * @param player The symbol of the player that wants to do the expert move (X or 0)
@@ -116,7 +122,7 @@ export class ComputerService {
     /**
      * If the opponent can do an expert winning move, block it.
      * But if the opponent can do 2 expert winning moves (i.e. still has a wining move after blocking it) then force them to play elsewhere by aligning 2 symbols.
-     * But be aware where we force them to play elsewhere, as they might get an expert winning move.
+     * But be aware where we force them to play elsewhere, as they might get an expert winning move from us.
      * @param table The current game
      * @param player The symbol of the player that wants to do the expert move (X or 0)
      * @returns the coordinates of the expert move, or null if no expert move is found
@@ -184,6 +190,20 @@ export class ComputerService {
                     }
                 }
             }
+        }
+        return null;
+    }
+
+    private getCenterOrCornerMove(table: Cell[][]): Position | null {
+        if (table[1][1] === Cell.EMPTY)
+            return { row: 1, column: 1 };
+
+        const emptyCorners: Position[] = [{ row: 0, column: 0 }, { row: 0, column: 2 }, { row: 2, column: 0 }, { row: 2, column: 2 }]
+            .filter(corner => table[corner.row][corner.column] === Cell.EMPTY);
+    
+        if (emptyCorners.length > 0) {
+            const randomIndex = Math.floor(Math.random() * emptyCorners.length);
+            return emptyCorners[randomIndex];
         }
         return null;
     }

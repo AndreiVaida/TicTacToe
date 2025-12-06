@@ -36,6 +36,18 @@ export class TableService {
         return isDraw ? Cell.EMPTY : null;
     };
 
+    public getNrOfSymbols(table: Cell[][], symbol: Cell): number {
+        let count = 0;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (table[i][j] === symbol) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
     private getHorizontalWinner = (table: Cell[][]): Cell | null => {
         for(const line of table) {
             const winner = this.getLineWinner(line);

@@ -26,5 +26,6 @@ export type Position = {
 
 export enum Difficulty {
     NORMAL = "Normal",
+    HARD = "Greu",
     EXPERT = "Expert"
 }

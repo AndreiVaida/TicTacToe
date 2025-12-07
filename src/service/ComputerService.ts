@@ -74,34 +74,54 @@ export class ComputerService {
     };
 
     private findMoveForComputerDifficulty = (table: Cell[][], player: Player): Position => {
-        if (player.computerDifficulty !== Difficulty.EXPERT)
+        const computerDifficulty = player.computerDifficulty ?? Difficulty.NORMAL;
+
+        if (computerDifficulty === Difficulty.NORMAL)
             return this.findRandomMove(table);
 
-        if (this.tableService.getNrOfSymbols(table, player.symbol) === 0) {
-            const centerOrCornerMove = this.getCenterOrCornerMove(table)!;
-            console.info(`> 💻 ${player.symbol} plays expert initial move [${centerOrCornerMove.row} ${centerOrCornerMove.column}]`);
-            return centerOrCornerMove;
-        }
+        if (computerDifficulty === Difficulty.HARD)
+            return this.expertWinMove(table, player)
+                ?? this.expertSecondMove(table, player)
+                ?? this.findRandomMove(table);
 
+        // Expert
+        return this.expertFirstMove(table, player)
+            ?? this.expertWinMove(table, player)
+            ?? this.expertDefensiveMove(table, player)
+            ?? this.expertSecondMove(table, player)
+            ?? this.findRandomMove(table);
+    };
+
+    private expertFirstMove = (table: Cell[][], player: Player): Position | null => {
+        if (this.tableService.getNrOfSymbols(table, player.symbol) !== 0) return null;
+        
+        const centerOrCornerMove = this.getCenterOrCornerMove(table)!;
+        console.info(`> 💻 ${player.symbol} plays expert initial move [${centerOrCornerMove.row} ${centerOrCornerMove.column}]`);
+        return centerOrCornerMove;
+    };
+
+    private expertWinMove = (table: Cell[][], player: Player): Position | null => {
         const expertWinMove = this.findExpertWinMove(table, player.symbol);
-        if (expertWinMove) {
-            console.info(`> 💻 ${player.symbol} plays expert win move [${expertWinMove.row} ${expertWinMove.column}]`);
-            return expertWinMove;
-        }
+        if (!expertWinMove) return null;
 
+        console.info(`> 💻 ${player.symbol} plays expert win move [${expertWinMove.row} ${expertWinMove.column}]`);
+        return expertWinMove;
+    };
+
+    private expertDefensiveMove = (table: Cell[][], player: Player): Position | null => {
         const defensiveExpertMove = this.findExpertDefensiveMove(table, player.symbol);
-        if (defensiveExpertMove) {
-            console.info(`> 💻 ${player.symbol} plays expert defensive move [${defensiveExpertMove.row} ${defensiveExpertMove.column}]`);
-            return defensiveExpertMove;
-        }
+        if (!defensiveExpertMove) return null;
 
-        if (this.tableService.getNrOfSymbols(table, player.symbol) === 1) {
-            const centerOrCornerMove = this.getCenterOrCornerMove(table)!;
-            console.info(`> 💻 ${player.symbol} plays expert second move [${centerOrCornerMove.row} ${centerOrCornerMove.column}]`);
-            return centerOrCornerMove;
-        }
+        console.info(`> 💻 ${player.symbol} plays expert defensive move [${defensiveExpertMove.row} ${defensiveExpertMove.column}]`);
+        return defensiveExpertMove;
+    };
 
-        return this.findRandomMove(table);
+    private expertSecondMove = (table: Cell[][], player: Player): Position | null => {
+        if (this.tableService.getNrOfSymbols(table, player.symbol) !== 1) return null;
+        
+        const centerOrCornerMove = this.getCenterOrCornerMove(table)!;
+        console.info(`> 💻 ${player.symbol} plays expert second move [${centerOrCornerMove.row} ${centerOrCornerMove.column}]`);
+        return centerOrCornerMove;
     };
 
     /**

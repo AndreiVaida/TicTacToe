@@ -1,5 +1,5 @@
 import { Difficulty, type Game, type Player } from "../../model/GameModels";
-import { Toggle } from "./Toggle";
+import { Dropdown } from "./Dropdown";
 
 type ComputerDifficultyToggleProps = {
     game: Game;
@@ -8,9 +8,9 @@ type ComputerDifficultyToggleProps = {
 };
 
 export const ComputerDifficultyToggle = ({ game, setGame, player }: ComputerDifficultyToggleProps) => {
-    const onDifficultyChange = () => {
-        const playerX = player.symbol === "X" ? switchDifficulty(player) : game.playerX;
-        const player0 = player.symbol === "0" ? switchDifficulty(player) : game.player0;
+    const onDifficultyChange = (newDifficulty: Difficulty) => {
+        const playerX = player.symbol === "X" ? switchDifficulty(player, newDifficulty) : game.playerX;
+        const player0 = player.symbol === "0" ? switchDifficulty(player, newDifficulty) : game.player0;
         setGame({
             ...game,
             playerX,
@@ -20,22 +20,10 @@ export const ComputerDifficultyToggle = ({ game, setGame, player }: ComputerDiff
 
     const difficulty = player.computerDifficulty ?? Difficulty.NORMAL;
 
-    return (
-        <>
-            <Toggle
-                ischecked={difficulty === Difficulty.EXPERT}
-                onToggle={onDifficultyChange}
-                text={difficulty}
-            />
-        </>
-    );
+    return <Dropdown options={[Difficulty.NORMAL, Difficulty.HARD, Difficulty.EXPERT]} defaultValue={difficulty} onChange={onDifficultyChange}/>;
 };
 
-const switchDifficulty = (player: Player): Player => {
-    const oldDifficulty = player.computerDifficulty ?? Difficulty.NORMAL;
-    const newDifficulty = oldDifficulty === Difficulty.NORMAL ? Difficulty.EXPERT : Difficulty.NORMAL;
-    return {
-        ...player,
-        computerDifficulty: newDifficulty
-    };
-};
+const switchDifficulty = (player: Player, newDifficulty: Difficulty): Player => ({
+    ...player,
+    computerDifficulty: newDifficulty
+});

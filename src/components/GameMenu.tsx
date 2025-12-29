@@ -15,7 +15,7 @@ export const GameMenu = ({ gameService, game, setGame }: GameMenuProps) => (
         {
             game &&
             <div className="leftMenu">
-                <button className="reset-btn" onClick={() => setGame(gameService.getInitialGame(game))}>Joc nou</button>
+                <button className="reset-btn" onClick={() => gameService.startNewGame(game)}>Joc nou</button>
                 <PlayerToggle game={game} setGame={setGame} player={game.playerX} />
                 <PlayerToggle game={game} setGame={setGame} player={game.player0} />
             </div>

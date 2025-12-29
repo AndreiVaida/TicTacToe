@@ -1,72 +1,30 @@
-import { Cell, type Game, type Player, type Position } from "../model/GameModels";
-import { LogUtils } from "../utils/LogUtils";
-import { ComputerService } from "./ComputerService";
-import { TableService } from "./TableService";
+import type { Game, Position } from "../model/GameModels";
+import { Observable } from "rxjs";
 
-/**
- * Service handling general playing logic.
- */
-export class TicTacToeService {
-    private tableService: TableService;
-    private computerService: ComputerService;
-
-    constructor(tableService: TableService, computerService: ComputerService) {
-        this.tableService = tableService;
-        this.computerService = computerService;
-    }
-
-    public getInitialGame = (game?: Game): Game => {
-        console.info("▶️ New game");
-
-        const table = this.tableService.createEmptyTable();
-        const playerX: Player = game?.playerX ?? { symbol: Cell.X, isComputer: false };
-        const player0: Player = game?.player0 ?? { symbol: Cell.ZERO, isComputer: false };
-        return {
-            table,
-            playerX,
-            player0,
-            currentPlayer: playerX,
-            isGameOver: false,
-        };
-    };
-
-    public doNextMove = (game: Game, position: Position): Game => {
-        console.info(LogUtils.getPlayerMoveInfo(game.currentPlayer, position));
-        const newTable = this.tableService.copyTable(game.table);
-        newTable[position.row][position.column] = game.currentPlayer!.symbol;
-
-        const winnerSymbol = this.tableService.getGameWinner(newTable);
-        const nextPlayer = this.getNextPlayer(winnerSymbol, game);
-        const winner = this.createWinnerPlayer(winnerSymbol, game);
-        const isGameOver = winnerSymbol !== null;
-
-        const newGame = {
-            ...game,
-            table: newTable,
-            currentPlayer: nextPlayer,
-            winner,
-            isGameOver
-        };
-
-        if (!isGameOver && nextPlayer!.isComputer) {
-            const computerMove = this.computerService.nextComputerMove(newTable, nextPlayer!);
-            return this.doNextMove(newGame, computerMove);
-        }
-        return newGame;
-    };
-   
+export interface TicTacToeService {
     /**
-     * @param winnerSymbol The symbol of the winner (X, 0, or EMPTY in case of a draw), or null if the game is still ongoing
-     * @param game The current game state
-     * @returns The next player, or null if the game is over (win or draw)
+     * Creates a new game instance. If a game is provided, it uses its settings (e.g. player configurations).
+     * The new game instance is emitted to subscribers by {@link gameUpdates}.
+     * @param game - the previous game (if any, to copy settings from)
      */
-    private getNextPlayer = (winnerSymbol: Cell | null, game: Game): Player | null => {
-        if (winnerSymbol !== null) return null;
-        return game.currentPlayer!.symbol === Cell.X ? game.player0 : game.playerX;
-    };
+    startNewGame(game?: Game): void;
 
-    private createWinnerPlayer = (winnerSymbol: Cell | null, game: Game): Player | undefined => {
-        if (winnerSymbol === null || winnerSymbol === Cell.EMPTY) return undefined;
-        return winnerSymbol == Cell.X ? game.playerX : game.player0;
-    };
+    /**
+     * Makes a new move at the specified position in the current game.
+     * The updated game instance is emitted to subscribers by {@link gameUpdates}.
+     * 
+     * The game state stored in the service is updated with the new move.
+     * If a game is provided, the game from the service state is updated according to the received game.
+     * Game settings = make a player computer/human or change computer difficulty.
+     * 
+     * @param position - the position where to make the move
+     * @param game - the previous game, if any, to copy its settings (e.g. player configurations)
+     */
+    doNewMove(position: Position, game?: Game): void;
+
+    /**
+     * The observable that emits updates to the game state whenever it changes.
+     * This is the latest game state after any move or game reset.
+     */
+    gameUpdates: Observable<Game>;
 }

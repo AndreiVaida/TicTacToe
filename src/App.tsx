@@ -1,28 +1,33 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-import { TicTacToeService } from "./service/TicTacToeService";
 import { Cell } from "./model/GameModels";
 import type { Game, Player } from "./model/GameModels";
 import { GameMenu } from "./components/GameMenu";
 import { TableService } from "./service/TableService";
 import { ComputerService } from "./service/ComputerService";
+import { TicTacToeServiceImpl } from "./service/TicTacToeServiceImpl";
+import type { TicTacToeService } from "./service/TicTacToeService";
 
 const App = () => {
     const tableService = useMemo(() => new TableService(), []);
     const computerService = useMemo(() => new ComputerService(tableService), [tableService]);
-    const gameService = useMemo(() => new TicTacToeService(tableService, computerService), [tableService, computerService]);
+    const gameService = useMemo<TicTacToeService>(() => new TicTacToeServiceImpl(tableService, computerService), [tableService, computerService]);
     const [game, setGame] = useState<Game>();
 
     useEffect(() => {
-        setGame(gameService.getInitialGame());
+        gameService.startNewGame();
+        gameService.gameUpdates.subscribe((newGame) => {
+            setGame(newGame);
+        });
     }, [gameService]);
 
+    useEffect(() => {
+        if (game?.isGameOver)
+            notifyGameOver(game.winner);
+    }, [game]);
+
     const handleClick = (i: number, j: number): void => {
-        const updatedGame = gameService.doNextMove(game!, {row: i, column: j});
-        setGame(updatedGame);
-        
-        if (updatedGame.isGameOver)
-            notifyGameOver(updatedGame.winner);
+        gameService.doNewMove({row: i, column: j}, game);
     };
 
     const createCell = (i: number, j: number, cell: Cell) => {

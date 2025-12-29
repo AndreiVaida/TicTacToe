@@ -5,11 +5,13 @@ import { ComputerService } from "./ComputerService";
 import { TableService } from "./TableService";
 import type { TicTacToeService } from "./TicTacToeService";
 import type { Observable } from "rxjs/internal/Observable";
+import { timer } from "rxjs/internal/observable/timer";
 
 /**
  * Service handling general playing logic.
  */
 export class TicTacToeServiceImpl implements TicTacToeService {
+    private static readonly COMPUTER_NEXTMOVE_DELAY = 500;
     private tableService: TableService;
     private computerService: ComputerService;
     private gameSubject: BehaviorSubject<Game>;
@@ -37,7 +39,15 @@ export class TicTacToeServiceImpl implements TicTacToeService {
             }
         }
 
-        this.gameSubject.next(this.getNextGame(game, position));
+        const nextGame = this.getNextGame(game, position);
+        this.gameSubject.next(nextGame);
+
+        if (!nextGame.isGameOver && nextGame.currentPlayer!.isComputer) {
+            timer(TicTacToeServiceImpl.COMPUTER_NEXTMOVE_DELAY).subscribe(() => {
+                const computerMove = this.computerService.nextComputerMove(nextGame.table, nextGame.currentPlayer!);
+                this.doNewMove(computerMove, nextGame);
+            });
+        }
     };
 
     private getNewGame(game?: Game): Game {
@@ -71,11 +81,6 @@ export class TicTacToeServiceImpl implements TicTacToeService {
             winner,
             isGameOver
         };
-
-        if (!isGameOver && nextPlayer!.isComputer) {
-            const computerMove = this.computerService.nextComputerMove(newTable, nextPlayer!);
-            return this.getNextGame(newGame, computerMove);
-        }
         return newGame;
     }
 

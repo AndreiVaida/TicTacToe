@@ -5,6 +5,7 @@ export type Game = {
     currentPlayer: Player | null;
     isGameOver: boolean;
     winner?: Player;
+    settings?: GameSettings;
 }
 
 export enum Cell {
@@ -28,4 +29,9 @@ export enum Difficulty {
     NORMAL = "Normal",
     HARD = "Greu",
     EXPERT = "Expert"
+}
+
+export type GameSettings = {
+    deleteMovesAfterSeconds?: number;
+    deleteRandomMovesAfterSeconds?: number;
 }

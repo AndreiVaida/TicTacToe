@@ -1,6 +1,7 @@
 import type { Game } from "../model/GameModels";
 import type { TicTacToeService } from "../service/TicTacToeService";
 import "./GameMenu.css";
+import { GameSettingsMenu } from "./GameSettingsMenu";
 import { PlayerToggle } from "./Toggle/PlayerToggle";
 import { ThemeToggle } from "./Toggle/ThemeToggle";
 
@@ -21,6 +22,9 @@ export const GameMenu = ({ gameService, game, setGame }: GameMenuProps) => (
             </div>
         }
         <div className="centerMenu">X și 0</div>
-        <div className="rightMenu"><ThemeToggle /></div>
+        <div className="rightMenu">
+            {game && <GameSettingsMenu game={game} setGame={setGame} />}
+            <ThemeToggle />
+        </div>
     </>
 );

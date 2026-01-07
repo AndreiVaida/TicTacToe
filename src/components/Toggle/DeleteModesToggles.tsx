@@ -1,10 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { GameSettings } from "../../model/GameModels";
 import type { GameSettingsMenuProps } from "../GameSettingsMenu";
 
 export const DeleteModesToggles = ({ game, setGame }: GameSettingsMenuProps) => {
     const [seconds, setSeconds] = useState(game.settings?.deleteMovesAfterSeconds ?? 5);
-    
+
+    useEffect(() => {
+        setSeconds(game.settings?.deleteMovesAfterSeconds ?? 5);
+    }, [game]);
+
+    useEffect(() => {
+        const newSettings: GameSettings = {
+            ...game?.settings,
+            deleteMovesAfterSeconds: seconds
+        };
+        setGame({
+            ...game,
+            settings: newSettings
+        });
+    }, [seconds]);
+
     const onSecondsChanged = (newSeconds: number) => {
         setSeconds(newSeconds);
 

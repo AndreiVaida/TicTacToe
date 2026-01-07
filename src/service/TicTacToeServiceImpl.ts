@@ -1,11 +1,13 @@
 import { BehaviorSubject } from "rxjs/internal/BehaviorSubject";
-import { Cell, type Game, type Player, type Position } from "../model/GameModels";
+import { Cell, type Game, type GameSettings, type Player, type Position } from "../model/GameModels";
 import { LogUtils } from "../utils/LogUtils";
 import { ComputerService } from "./ComputerService";
 import { TableService } from "./TableService";
 import type { TicTacToeService } from "./TicTacToeService";
 import type { Observable } from "rxjs/internal/Observable";
 import { timer } from "rxjs/internal/observable/timer";
+
+const deleteMovePrefix = "\x1B[31m🗑️";
 
 /**
  * Service handling general playing logic.
@@ -25,8 +27,9 @@ export class TicTacToeServiceImpl implements TicTacToeService {
     }
 
     public startNewGame(game?: Game) {
-        console.info("▶️ New game");
-        this.gameSubject.next(this.getNewGame(game));
+        const newGame = this.getNewGame(game);
+        console.info(`▶️ New game #${newGame.id}`);
+        this.gameSubject.next(newGame);
     };
 
     public doNewMove(position: Position, gameFromUI?: Game) {
@@ -35,31 +38,37 @@ export class TicTacToeServiceImpl implements TicTacToeService {
             game = {
                 ...game,
                 playerX: gameFromUI.playerX,
-                player0: gameFromUI.player0
+                player0: gameFromUI.player0,
+                settings: gameFromUI.settings
             }
         }
 
         const nextGame = this.getNextGame(game, position);
         this.gameSubject.next(nextGame);
 
-        if (!nextGame.isGameOver && nextGame.currentPlayer!.isComputer) {
-            timer(TicTacToeServiceImpl.COMPUTER_NEXTMOVE_DELAY).subscribe(() => {
-                const computerMove = this.computerService.nextComputerMove(nextGame.table, nextGame.currentPlayer!);
-                this.doNewMove(computerMove, nextGame);
-            });
+        if (this.isComputerTurn(nextGame)) {
+            this.delayAction(TicTacToeServiceImpl.COMPUTER_NEXTMOVE_DELAY, nextGame.id, this.doComputerMove);
+        }
+
+        if (nextGame.settings?.deleteMovesAfterSeconds) {
+            this.delayAction(nextGame.settings.deleteMovesAfterSeconds * 1000, nextGame.id, this.getDeleteFunctionFor(position));
         }
     };
 
     private getNewGame(game?: Game): Game {
+        const id = (game?.id ?? 0) + 1;
         const table = this.tableService.createEmptyTable();
         const playerX: Player = game?.playerX ?? { symbol: Cell.X, isComputer: false };
         const player0: Player = game?.player0 ?? { symbol: Cell.ZERO, isComputer: false };
+        const settings: GameSettings | undefined = game?.settings ?? undefined;
         return {
+            id,
             table,
             playerX,
             player0,
             currentPlayer: playerX,
             isGameOver: false,
+            settings
         };
     }
    
@@ -98,4 +107,34 @@ export class TicTacToeServiceImpl implements TicTacToeService {
         if (winnerSymbol === null || winnerSymbol === Cell.EMPTY) return undefined;
         return winnerSymbol == Cell.X ? game.playerX : game.player0;
     };
+
+    private delayAction = (delayMs: number, gameId: number, action: (game: Game) => void) =>
+        timer(delayMs).subscribe(() => {
+            const game = this.gameSubject.value;
+
+            if (game.isGameOver || game.id !== gameId) return;
+            action(game);
+        });
+
+
+    private isComputerTurn = (game: Game): boolean => !game.isGameOver && game.currentPlayer!.isComputer;
+
+    private doComputerMove = (game: Game) => {
+        const computerMove = this.computerService.nextComputerMove(game.table, game.currentPlayer!);
+        this.doNewMove(computerMove, game);
+    }
+
+    private getDeleteFunctionFor = (position: Position): (game: Game) => void => {
+        return (game: Game) => {
+            const newTable = this.tableService.copyTable(game.table);
+            const deletedCell = newTable[position.row][position.column];
+            newTable[position.row][position.column] = Cell.EMPTY;
+            const newGame = {
+                ...game,
+                table: newTable,
+            };
+            console.info(`${deleteMovePrefix} Delete move ${deletedCell} [${position.row} ${position.column}]`);
+            this.gameSubject.next(newGame);
+        };
+    }
 }

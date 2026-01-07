@@ -1,4 +1,5 @@
 export type Game = {
+    id: number;
     table: Cell[][];
     playerX: Player;
     player0: Player;

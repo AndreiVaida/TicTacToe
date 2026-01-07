@@ -1,6 +1,8 @@
 import { Cell, Difficulty, type Player, type Position } from "../model/GameModels";
 import type { TableService } from "./TableService";
 
+const debugPrefix = "\x1B[37m> 💻";
+
 /**
  * Service handling the computer player's moves.„
  */
@@ -14,13 +16,13 @@ export class ComputerService {
     public nextComputerMove = (table: Cell[][], player: Player): Position => {
         const winingMove = this.findWinningMove(table, player.symbol);
         if (winingMove) {
-            console.info(`> 💻 ${player.symbol} plays wining move [${winingMove.row} ${winingMove.column}]`);
+            console.info(`${debugPrefix} ${player.symbol} plays wining move [${winingMove.row} ${winingMove.column}]`);
             return winingMove;
         }
 
         const defensiveMove = this.findDefensiveMove(table, player.symbol);
         if (defensiveMove) {
-            console.info(`> 💻 ${player.symbol} plays defensive move [${defensiveMove.row} ${defensiveMove.column}]`);
+            console.info(`${debugPrefix} ${player.symbol} plays defensive move [${defensiveMove.row} ${defensiveMove.column}]`);
             return defensiveMove;
         }
 
@@ -69,7 +71,7 @@ export class ComputerService {
         }
         const randomIndex = Math.floor(Math.random() * emptyPositions.length);
         const randomMove = emptyPositions[randomIndex];
-        console.info(`> 💻 random move [${randomMove.row} ${randomMove.column}]`);
+        console.info(`${debugPrefix} random move [${randomMove.row} ${randomMove.column}]`);
         return randomMove;
     };
 
@@ -96,7 +98,7 @@ export class ComputerService {
         if (this.tableService.getNrOfSymbols(table, player.symbol) !== 0) return null;
         
         const centerOrCornerMove = this.getCenterOrCornerMove(table)!;
-        console.info(`> 💻 ${player.symbol} plays expert initial move [${centerOrCornerMove.row} ${centerOrCornerMove.column}]`);
+        console.info(`${debugPrefix} ${player.symbol} plays expert initial move [${centerOrCornerMove.row} ${centerOrCornerMove.column}]`);
         return centerOrCornerMove;
     };
 
@@ -104,7 +106,7 @@ export class ComputerService {
         const expertWinMove = this.findExpertWinMove(table, player.symbol);
         if (!expertWinMove) return null;
 
-        console.info(`> 💻 ${player.symbol} plays expert win move [${expertWinMove.row} ${expertWinMove.column}]`);
+        console.info(`${debugPrefix} ${player.symbol} plays expert win move [${expertWinMove.row} ${expertWinMove.column}]`);
         return expertWinMove;
     };
 
@@ -112,7 +114,7 @@ export class ComputerService {
         const defensiveExpertMove = this.findExpertDefensiveMove(table, player.symbol);
         if (!defensiveExpertMove) return null;
 
-        console.info(`> 💻 ${player.symbol} plays expert defensive move [${defensiveExpertMove.row} ${defensiveExpertMove.column}]`);
+        console.info(`${debugPrefix} ${player.symbol} plays expert defensive move [${defensiveExpertMove.row} ${defensiveExpertMove.column}]`);
         return defensiveExpertMove;
     };
 
@@ -120,7 +122,7 @@ export class ComputerService {
         if (this.tableService.getNrOfSymbols(table, player.symbol) !== 1) return null;
         
         const centerOrCornerMove = this.getCenterOrCornerMove(table)!;
-        console.info(`> 💻 ${player.symbol} plays expert second move [${centerOrCornerMove.row} ${centerOrCornerMove.column}]`);
+        console.info(`${debugPrefix} ${player.symbol} plays expert second move [${centerOrCornerMove.row} ${centerOrCornerMove.column}]`);
         return centerOrCornerMove;
     };
 

@@ -14,6 +14,7 @@ const App = () => {
     const computerService = useMemo(() => new ComputerService(tableService), [tableService]);
     const gameService = useMemo<TicTacToeService>(() => new TicTacToeServiceImpl(tableService, computerService), [tableService, computerService]);
     const [game, setGame] = useState<Game>();
+    const [gameOverNotifiedId, setGameOverNotifiedId] = useState<number>(-1);
 
     useEffect(() => {
         gameService.startNewGame();
@@ -23,8 +24,10 @@ const App = () => {
     }, [gameService]);
 
     useEffect(() => {
-        if (game?.isGameOver)
+        if (game?.isGameOver && gameOverNotifiedId !== game.id) {
+            setGameOverNotifiedId(game.id);
             notifyGameOver(game.winner);
+        }
     }, [game]);
 
     const handleCellClick = (i: number, j: number): void => {

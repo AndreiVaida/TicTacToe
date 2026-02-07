@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Player } from '../model/GameModels';
+import type { Player } from '../../model/GameModels';
 import './GameOverModal.css';
 
 export type GameOverModalProps = {

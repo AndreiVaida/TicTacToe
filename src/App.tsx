@@ -3,7 +3,7 @@ import "./App.css";
 import { Cell } from "./model/GameModels";
 import type { Game, Player } from "./model/GameModels";
 import { GameMenu } from "./components/GameMenu";
-import { GameOverModal } from "./components/Modal";
+import { GameOverModal } from "./components/Modal/GameOverModal";
 import { TableService } from "./service/TableService";
 import { ComputerService } from "./service/ComputerService";
 import { TicTacToeServiceImpl } from "./service/TicTacToeServiceImpl";

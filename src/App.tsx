@@ -3,6 +3,7 @@ import "./App.css";
 import { Cell } from "./model/GameModels";
 import type { Game, Player } from "./model/GameModels";
 import { GameMenu } from "./components/GameMenu";
+import { GameOverModal } from "./components/Modal";
 import { TableService } from "./service/TableService";
 import { ComputerService } from "./service/ComputerService";
 import { TicTacToeServiceImpl } from "./service/TicTacToeServiceImpl";
@@ -51,12 +52,9 @@ const App = () => {
 
     const notifyGameOver = (winner: Player | undefined) => {
         console.info(`🏁 Game over. ${winner ? `${winner.symbol} won` : "Draw"}`);
-
-        setTimeout(() => {
-            if (!winner) alert("Egalitate!");
-            else alert(`${winner.symbol} a câștigat!`);
-        }, 100);
     };
+
+    const handleStartNewGame = () => gameService.startNewGame(game);
 
     const setGameState = (newGame: Game) => setGame(newGame);
 
@@ -70,6 +68,12 @@ const App = () => {
                         : "Game not available"
                 }
             </div>
+            {game?.isGameOver && (
+                <GameOverModal
+                    winner={game.winner || undefined}
+                    onStartNewGame={handleStartNewGame}
+                />
+            )}
         </>
     );
 };

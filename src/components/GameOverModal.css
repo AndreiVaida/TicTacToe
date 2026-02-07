@@ -1,0 +1,79 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background-color: var(--background);
+    color: var(--foreground);
+    border: 3px solid #1f4981;
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    max-width: 90vw;
+    width: 400px;
+}
+
+.modal-content h2 {
+    font-size: 2.5rem;
+    margin: 0 0 2rem 0;
+    font-family: Cursive;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.modal-buttons button {
+    padding: 0.8rem 1.5rem;
+    font-size: 1.2rem;
+    background-color: #1f4981;
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modal-buttons button:hover {
+    background-color: #2e5ca3;
+}
+
+.modal-buttons button:active {
+    background-color: #1a3460;
+}
+
+/* Portrait (vertical) screens — make modal bigger */
+@media (max-aspect-ratio: 2/3) {
+    .modal-content {
+        width: 90vw;
+        padding: 2rem 1.5rem;
+    }
+
+    .modal-content h2 {
+        font-size: 5rem;
+        margin-bottom: 4rem;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .modal-buttons button {
+        padding: 1rem 2rem;
+        font-size: 5rem;
+        width: 100%;
+    }
+}

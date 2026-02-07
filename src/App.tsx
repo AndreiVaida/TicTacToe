@@ -27,14 +27,15 @@ const App = () => {
             notifyGameOver(game.winner);
     }, [game]);
 
-    const handleClick = (i: number, j: number): void => {
+    const handleCellClick = (i: number, j: number): void => {
+        if (game?.currentPlayer?.isComputer) return;
         gameService.doNewMove({row: i, column: j}, game);
     };
 
     const createCell = (i: number, j: number, cell: Cell) => {
         const isCellPlayable = tableService.isCellPlayable(i, j, game!);
         return (
-            <div key={i + "_" + j} className={getCellClasses(cell, isCellPlayable)} onClick={isCellPlayable ? () => handleClick(i, j) : undefined}>
+            <div key={i + "_" + j} className={getCellClasses(cell, isCellPlayable)} onClick={isCellPlayable ? () => handleCellClick(i, j) : undefined}>
                 <span>{cell}</span>
             </div>
         );

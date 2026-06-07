@@ -127,7 +127,7 @@ export class TicTacToeServiceImpl implements TicTacToeService {
             this.stopRandomDelete();
         } else {
             if (this.isSameActiveSubscription(seconds)) return;
-            this.restartRandomDeleteSubscription(seconds, game);
+            this.restartRandomDeleteSubscription(seconds);
         }
 
         this.lastRandomDeleteSeconds = seconds;
@@ -151,14 +151,14 @@ export class TicTacToeServiceImpl implements TicTacToeService {
         this.doNewMove(computerMove, game);
     };
 
-    private restartRandomDeleteSubscription = (seconds: number, game: Game) => {
+    private restartRandomDeleteSubscription = (seconds: number) => {
         if (this.randomDeleteSubscription) {
             this.randomDeleteSubscription.unsubscribe();
         }
 
         this.randomDeleteSubscription = interval(seconds * 1000).subscribe(() => {
             const currentGame = this.gameSubject.value;
-            if (currentGame.isGameOver || currentGame.id !== game.id) return;
+            if (currentGame.isGameOver) return;
             this.deleteRandomMove(currentGame);
         });
     };

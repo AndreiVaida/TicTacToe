@@ -1,4 +1,4 @@
-import { type Game, Cell } from "../model/GameModels";
+import { type Game, type Position, Cell } from "../model/GameModels";
 
 /**
  * Service handling table state and operations.
@@ -46,6 +46,17 @@ export class TableService {
             }
         }
         return count;
+    }
+
+    public getPlayedPositions(table: Cell[][]): Position[] {
+        const positions: Position[] = [];
+        for (let row = 0; row < table.length; row++) {
+            for (let column = 0; column < table[row].length; column++) {
+                if (table[row][column] !== Cell.EMPTY)
+                    positions.push({ row, column });
+            }
+        }
+        return positions;
     }
 
     private getHorizontalWinner = (table: Cell[][]): Cell | null => {

@@ -4,6 +4,9 @@ Game developed by Andrei Lucian Vaida 🎮
 
 This is a React app (with TypeScript) created with Vite.
 
+## Development
+Run `npm run dev` and open http://localhost:5173!
+
 ## Deployment
 TicTacToe is playable on browser (computer and smartphone).
 

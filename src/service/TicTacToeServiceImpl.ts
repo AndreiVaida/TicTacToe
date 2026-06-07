@@ -1,4 +1,5 @@
 import { BehaviorSubject } from "rxjs/internal/BehaviorSubject";
+import { interval, Subscription } from "rxjs";
 import { Cell, type Game, type GameSettings, type Player, type Position } from "../model/GameModels";
 import { LogUtils } from "../utils/LogUtils";
 import { ComputerService } from "./ComputerService";
@@ -18,12 +19,15 @@ export class TicTacToeServiceImpl implements TicTacToeService {
     private computerService: ComputerService;
     private gameSubject: BehaviorSubject<Game>;
     public gameUpdates: Observable<Game>;
+    private randomDeleteSubscription?: Subscription;
+    private lastRandomDeleteSeconds?: number;
 
     constructor(tableService: TableService, computerService: ComputerService) {
         this.tableService = tableService;
         this.computerService = computerService;
         this.gameSubject = new BehaviorSubject<Game>(this.getNewGame());
         this.gameUpdates = this.gameSubject.asObservable();
+        this.gameUpdates.subscribe(game => this.handleRandomDeleteSettings(game));
     }
 
     public startNewGame(game?: Game) {
@@ -40,7 +44,7 @@ export class TicTacToeServiceImpl implements TicTacToeService {
                 playerX: gameFromUI.playerX,
                 player0: gameFromUI.player0,
                 settings: gameFromUI.settings
-            }
+            };
         }
 
         const nextGame = this.getNextGame(game, position);
@@ -116,13 +120,68 @@ export class TicTacToeServiceImpl implements TicTacToeService {
             action(game);
         });
 
+    private handleRandomDeleteSettings = (game: Game) => {
+        const seconds = game.settings?.deleteRandomMovesAfterSeconds ?? 0;
+
+        if (this.shouldStopRandomDelete(seconds)) {
+            this.stopRandomDelete();
+        } else {
+            if (this.isSameActiveSubscription(seconds)) return;
+            this.restartRandomDeleteSubscription(seconds, game);
+        }
+
+        this.lastRandomDeleteSeconds = seconds;
+    };
+
+    private shouldStopRandomDelete = (seconds: number): boolean => (seconds ?? 0) <= 0;
+
+    private stopRandomDelete = () => {
+        if (this.randomDeleteSubscription) {
+            this.randomDeleteSubscription.unsubscribe();
+            this.randomDeleteSubscription = undefined;
+        }
+    };
+
+    private isSameActiveSubscription = (seconds: number): boolean => this.lastRandomDeleteSeconds === seconds && this.randomDeleteSubscription !== undefined;
 
     private isComputerTurn = (game: Game): boolean => !game.isGameOver && game.currentPlayer!.isComputer;
 
     private doComputerMove = (game: Game) => {
         const computerMove = this.computerService.nextComputerMove(game.table, game.currentPlayer!);
         this.doNewMove(computerMove, game);
-    }
+    };
+
+    private restartRandomDeleteSubscription = (seconds: number, game: Game) => {
+        if (this.randomDeleteSubscription) {
+            this.randomDeleteSubscription.unsubscribe();
+        }
+
+        this.randomDeleteSubscription = interval(seconds * 1000).subscribe(() => {
+            const currentGame = this.gameSubject.value;
+            if (currentGame.isGameOver || currentGame.id !== game.id) return;
+            this.deleteRandomMove(currentGame);
+        });
+    };
+
+    private deleteRandomMove = (game: Game) => {
+        const positions = this.tableService.getPlayedPositions(game.table);
+        if (!positions.length) return;
+
+        const randomIndexInPositions = Math.floor(Math.random() * positions.length);
+        const positionToDelete = positions[randomIndexInPositions];
+
+        const newTable = this.tableService.copyTable(game.table);
+        const deletedCell = newTable[positionToDelete.row][positionToDelete.column];
+        newTable[positionToDelete.row][positionToDelete.column] = Cell.EMPTY;
+
+        const newGame: Game = {
+            ...game,
+            table: newTable,
+        };
+
+        console.info(`${deleteMovePrefix} Delete random move ${deletedCell} [${positionToDelete.row} ${positionToDelete.column}]`);
+        this.gameSubject.next(newGame);
+    };
 
     private getDeleteFunctionFor = (position: Position): (game: Game) => void => {
         return (game: Game) => {
@@ -136,5 +195,5 @@ export class TicTacToeServiceImpl implements TicTacToeService {
             console.info(`${deleteMovePrefix} Delete move ${deletedCell} [${position.row} ${position.column}]`);
             this.gameSubject.next(newGame);
         };
-    }
+    };
 }

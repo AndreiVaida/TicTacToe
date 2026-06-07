@@ -13,6 +13,6 @@ export const Toggle = ({ischecked, onToggle, text}: ToggleProps) => (
                 onChange={onToggle} />
             <span className="slider" />
         </label>
-        <span className="toggle-label">{text}</span>
+        {text && <span className="toggle-label">{text}</span>}
     </div>
 );

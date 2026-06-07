@@ -55,7 +55,7 @@ body {
 }
 
 @media (min-aspect-ratio: 8/9) {
-  .board { margin-top: 4rem; }
+  .board { margin-top: 7rem; }
 }
 
 .cell {

@@ -3,6 +3,7 @@ import "./App.css";
 import { Cell } from "./model/GameModels";
 import type { Game, Player } from "./model/GameModels";
 import { GameMenu } from "./components/GameMenu";
+import BoardCell from "./components/Cell/BoardCell";
 import { GameOverModal } from "./components/Modal/GameOverModal";
 import { TableService } from "./service/TableService";
 import { ComputerService } from "./service/ComputerService";
@@ -28,7 +29,7 @@ const App = () => {
             setGameOverNotifiedId(game.id);
             notifyGameOver(game.winner);
         }
-    }, [game]);
+    }, [game, gameOverNotifiedId]);
 
     const handleCellClick = (i: number, j: number): void => {
         if (game?.currentPlayer?.isComputer) return;
@@ -37,10 +38,9 @@ const App = () => {
 
     const createCell = (i: number, j: number, cell: Cell) => {
         const isCellPlayable = tableService.isCellPlayable(i, j, game!);
+        const className = getCellClasses(cell, isCellPlayable);
         return (
-            <div key={i + "_" + j} className={getCellClasses(cell, isCellPlayable)} onClick={isCellPlayable ? () => handleCellClick(i, j) : undefined}>
-                <span>{cell}</span>
-            </div>
+            <BoardCell key={i + "_" + j} className={className} cell={cell} onClick={isCellPlayable ? () => handleCellClick(i, j) : undefined} />
         );
     };
 

@@ -123,7 +123,7 @@ export class TicTacToeServiceImpl implements TicTacToeService {
     private handleRandomDeleteSettings = (game: Game) => {
         const seconds = game.settings?.deleteRandomMovesAfterSeconds ?? 0;
 
-        if (this.shouldStopRandomDelete(seconds)) {
+        if (this.shouldStopRandomDelete(seconds, game)) {
             this.stopRandomDelete();
         } else {
             if (this.isSameActiveSubscription(seconds)) return;
@@ -133,7 +133,7 @@ export class TicTacToeServiceImpl implements TicTacToeService {
         this.lastRandomDeleteSeconds = seconds;
     };
 
-    private shouldStopRandomDelete = (seconds: number): boolean => (seconds ?? 0) <= 0;
+    private shouldStopRandomDelete = (seconds: number, game: Game): boolean => (seconds ?? 0) <= 0 || game.isGameOver;
 
     private stopRandomDelete = () => {
         if (this.randomDeleteSubscription) {

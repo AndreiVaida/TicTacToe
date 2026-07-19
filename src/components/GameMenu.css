@@ -30,6 +30,13 @@
     gap: 0.5rem;
 }
 
+.delete-modes-toggles {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
 .reset-btn {
     padding: 0.5rem 1.2rem;
     font-size: 1rem;
@@ -58,7 +65,7 @@
 
 .toggle input {
   opacity: 0;
-  width: 0;
+  width: 100px;
   height: 0;
 }
 
@@ -161,6 +168,15 @@ input[type="number"] {
     align-items: flex-end;
   }
 
+  .delete-modes-toggles {
+    width: 120%;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 2rem;
+    align-items: flex-end;
+    margin-top: 15rem;
+  }
+
   .reset-btn {
     padding: 0.8rem 1.6rem;
     font-size: 4rem;
@@ -204,7 +220,11 @@ input[type="number"] {
 
   .delete-modes-container {
     font-size: 2rem;
-    width: 35rem;
+    flex: 0 1 48%;
+    flex-wrap: wrap;
+    max-width: 85%;
+    row-gap: 0.5rem;
+    column-gap: 0.8rem;
   }
   
   .increase-button {
